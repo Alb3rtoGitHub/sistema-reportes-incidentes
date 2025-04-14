@@ -2,6 +2,7 @@ package com.example.sistemareportesincidentes.controller;
 
 import com.example.sistemareportesincidentes.dto.ClienteDTO;
 import com.example.sistemareportesincidentes.dto.ClienteResponseDTO;
+import com.example.sistemareportesincidentes.dto.ServicioDTO;
 import com.example.sistemareportesincidentes.entity.Cliente;
 import com.example.sistemareportesincidentes.service.ClienteService;
 import jakarta.validation.Valid;
@@ -46,5 +47,13 @@ public class ClienteController {
         return ResponseEntity.noContent().build();
     }
 
-    
+    @PostMapping("/{id}/servicios")
+    public ResponseEntity<ClienteResponseDTO> asociarServicios(@PathVariable Long id, @RequestBody List<Long> serviciosIds) {
+        return ResponseEntity.ok(clienteService.asociarServicios(id, serviciosIds));
+    }
+
+    @DeleteMapping("/{idCliente}/servicios/{idServicio}")
+    public ResponseEntity<ClienteResponseDTO> desasociarServicios(@PathVariable Long idCliente, @PathVariable Long idServicio) {
+        return ResponseEntity.ok(clienteService.desasociarServicios(idCliente, idServicio));
+    }
 }
