@@ -18,7 +18,7 @@ public class Especialidad {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idEspecialidad;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, length = 255, unique = true)
     private String nombre;
 
     // relaciones con tecnico y tipoProblemas?
