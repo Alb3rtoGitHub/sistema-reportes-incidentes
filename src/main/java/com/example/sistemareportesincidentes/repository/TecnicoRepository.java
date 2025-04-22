@@ -3,8 +3,10 @@ package com.example.sistemareportesincidentes.repository;
 import com.example.sistemareportesincidentes.entity.Tecnico;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -12,11 +14,11 @@ public interface TecnicoRepository extends JpaRepository<Tecnico, Long> {
     Optional<Tecnico> findTecnicoByNombre(String nombre);
 
     // Continuar luego con los Queries metodos adicionales...
-//    Optional<Tecnico> findByEmail(String email);
-//
-//    @Query("SELECT t FROM Tecnico t JOIN t.especialidades e WHERE e.idEspecialidad = :especialidadId")
-//    List<Tecnico> findByEspecialidad(Long especialidadId);
-//
+    Optional<Tecnico> findByEmail(String email);
+
+    @Query("SELECT t FROM Tecnico t JOIN t.especialidades e WHERE e.idEspecialidad = :idEspecialidad")
+    List<Tecnico> findTecnicosByEspecialidadId(Long especialidadId);
+
 //    @Query("SELECT i.tecnicoAsignado, COUNT(i) as incidentesResueltos FROM Incidente i WHERE i.estado = 'RESUELTO' AND i.fechaResolucion >= :fechaInicio GROUP BY i.tecnicoAsignado ORDER BY incidentesResueltos DESC")
 //    List<Object[]> findTecnicosConMasIncidentesResueltos(LocalDateTime fechaInicio);
 //

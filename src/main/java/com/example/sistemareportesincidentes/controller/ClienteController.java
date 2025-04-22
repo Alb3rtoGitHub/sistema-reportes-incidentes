@@ -2,8 +2,6 @@ package com.example.sistemareportesincidentes.controller;
 
 import com.example.sistemareportesincidentes.dto.ClienteDTO;
 import com.example.sistemareportesincidentes.dto.ClienteResponseDTO;
-import com.example.sistemareportesincidentes.dto.ServicioDTO;
-import com.example.sistemareportesincidentes.entity.Cliente;
 import com.example.sistemareportesincidentes.service.ClienteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

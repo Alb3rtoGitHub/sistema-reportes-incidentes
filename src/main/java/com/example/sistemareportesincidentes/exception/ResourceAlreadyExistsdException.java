@@ -1,7 +1,5 @@
 package com.example.sistemareportesincidentes.exception;
 
-import jakarta.validation.constraints.NotBlank;
-
 public class ResourceAlreadyExistsdException extends RuntimeException {
 
     public ResourceAlreadyExistsdException(String message) {
