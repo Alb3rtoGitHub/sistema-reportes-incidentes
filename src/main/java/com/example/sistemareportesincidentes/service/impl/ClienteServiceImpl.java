@@ -5,7 +5,7 @@ import com.example.sistemareportesincidentes.dto.ClienteResponseDTO;
 import com.example.sistemareportesincidentes.dto.ServicioDTO;
 import com.example.sistemareportesincidentes.entity.Cliente;
 import com.example.sistemareportesincidentes.entity.Servicio;
-import com.example.sistemareportesincidentes.exception.ResourceAlreadyExistsdException;
+import com.example.sistemareportesincidentes.exception.ResourceAlreadyExistsException;
 import com.example.sistemareportesincidentes.exception.ResourceNotFoundException;
 import com.example.sistemareportesincidentes.repository.ClienteRepository;
 import com.example.sistemareportesincidentes.service.ClienteService;
@@ -53,7 +53,7 @@ public class ClienteServiceImpl implements ClienteService {
         // Verificar si ya existe un cliente con el mismo CUIT
         Optional<Cliente> clienteExistente = clienteRepository.findClienteByCuit(clienteDTO.getCuit());
         if (clienteExistente.isPresent()) {
-            throw new ResourceAlreadyExistsdException("Cliente", "CUIT", clienteDTO.getCuit());
+            throw new ResourceAlreadyExistsException("Cliente", "CUIT", clienteDTO.getCuit());
         }
 
         Cliente cliente = Cliente.builder()
@@ -81,7 +81,7 @@ public class ClienteServiceImpl implements ClienteService {
         // Verificar si el nuevo CUIT ya existe en otro cliente
         Optional<Cliente> clienteConMismoCuit = clienteRepository.findClienteByCuit(clienteDTO.getCuit());
         if (clienteConMismoCuit.isPresent() && !clienteConMismoCuit.get().getIdCliente().equals(id)) {
-            throw new ResourceAlreadyExistsdException("Cliente", "CUIT", clienteDTO.getCuit());
+            throw new ResourceAlreadyExistsException("Cliente", "CUIT", clienteDTO.getCuit());
         }
 
         cliente.setRazonSocial(clienteDTO.getRazonSocial());

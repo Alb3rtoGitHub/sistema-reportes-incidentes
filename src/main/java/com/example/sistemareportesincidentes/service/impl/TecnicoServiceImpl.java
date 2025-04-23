@@ -6,7 +6,7 @@ import com.example.sistemareportesincidentes.dto.TecnicoResponseDTO;
 import com.example.sistemareportesincidentes.entity.Especialidad;
 import com.example.sistemareportesincidentes.entity.Tecnico;
 import com.example.sistemareportesincidentes.exception.BadRequestException;
-import com.example.sistemareportesincidentes.exception.ResourceAlreadyExistsdException;
+import com.example.sistemareportesincidentes.exception.ResourceAlreadyExistsException;
 import com.example.sistemareportesincidentes.exception.ResourceNotFoundException;
 import com.example.sistemareportesincidentes.repository.TecnicoRepository;
 import com.example.sistemareportesincidentes.service.EspecialidadService;
@@ -15,6 +15,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +50,7 @@ public class TecnicoServiceImpl implements TecnicoService {
         // Verificar si ya existe un técnico con el mismo nombre
         Optional<Tecnico> tecnicoExistente = tecnicoRepository.findTecnicoByNombre(tecnicoDTO.getNombre());
         if (tecnicoExistente.isPresent()) {
-            throw new ResourceAlreadyExistsdException("Tecnico", "nombre", tecnicoDTO.getNombre());
+            throw new ResourceAlreadyExistsException("Tecnico", "nombre", tecnicoDTO.getNombre());
         }
 
         Tecnico tecnico = Tecnico.builder()
@@ -78,7 +79,7 @@ public class TecnicoServiceImpl implements TecnicoService {
         // Verificar si el nuevo nombre ya existe en otro técnico
         Optional<Tecnico> tecnicoConMismoNombre = tecnicoRepository.findTecnicoByNombre(tecnicoDTO.getNombre());
         if (tecnicoConMismoNombre.isPresent() && !tecnicoConMismoNombre.get().getIdTecnico().equals(id)) {
-            throw new ResourceAlreadyExistsdException("Tecnico", "nombre", tecnicoDTO.getNombre());
+            throw new ResourceAlreadyExistsException("Tecnico", "nombre", tecnicoDTO.getNombre());
         }
 
         tecnico.setNombre(tecnicoDTO.getNombre());
@@ -103,6 +104,14 @@ public class TecnicoServiceImpl implements TecnicoService {
         }
         tecnicoRepository.deleteById(id);
     }
+
+    @Override
+    public List<TecnicoResponseDTO> findTecnicosByEspecialidad(Long especialidadId) {
+        return tecnicoRepository.findTecnicosByEspecialidadId(especialidadId).stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     public TecnicoResponseDTO asociarEspecialidades(Long idTecnico, List<Long> especialidadesIds) {
@@ -136,10 +145,20 @@ public class TecnicoServiceImpl implements TecnicoService {
     }
 
     @Override
-    public List<TecnicoResponseDTO> findTecnicosByEspecialidad(Long especialidadId) {
-        return tecnicoRepository.findTecnicosByEspecialidadId(especialidadId).stream()
-                .map(this::convertToResponseDTO)
-                .collect(Collectors.toList());
+    public List<Object[]> obtenerTecnicosConMasIncidentesResueltos(int dias) {
+        LocalDateTime fechaInicio = LocalDateTime.now().minusDays(dias);
+        return tecnicoRepository.findTecnicosConMasIncidentesResueltos(fechaInicio);
+    }
+
+    @Override
+    public List<Object[]> obtenerTecnicosConMasIncidentesResueltosporEspecialidad(int dias, Long especialidadId) {
+        LocalDateTime fechaInicio = LocalDateTime.now().minusDays(dias);
+        return tecnicoRepository.findTecnicosConMasIncidentesResueltosporEspecialidad(fechaInicio, especialidadId);
+    }
+
+    @Override
+    public List<Object[]> obtenerTecnicosConMenorTiempoResolucion() {
+        return tecnicoRepository.findTecnicosConMenorTiempoResolucion();
     }
 
     // Metodo privado auxiliar para convertir entidad a DTO de respuesta

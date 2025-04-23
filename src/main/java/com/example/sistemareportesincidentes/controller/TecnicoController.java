@@ -55,10 +55,23 @@ public class TecnicoController {
         return ResponseEntity.ok(tecnicoService.asociarEspecialidades(id, especialidadesIds));
     }
 
-    @DeleteMapping("/{idTecnico}/especialidades/{idEspecialidad")
+    @DeleteMapping("/{idTecnico}/especialidades/{idEspecialidad}")
     public ResponseEntity<TecnicoResponseDTO> desasociarServicios(@PathVariable Long idTecnico, @PathVariable Long idEspecialidad) {
         return ResponseEntity.ok(tecnicoService.desasociarEspecialidades(idTecnico, idEspecialidad));
     }
 
+    @GetMapping("/mas-incidentes/{dias}")
+    public ResponseEntity<List<Object[]>> obtenerTecnicosConMasIncidentesResueltos(@PathVariable Integer dias) {
+        return ResponseEntity.ok(tecnicoService.obtenerTecnicosConMasIncidentesResueltos(dias));
+    }
 
+    @GetMapping("/mas-incidentes/{dias}/especialidad/{especialidad}")
+    public ResponseEntity<List<Object[]>> obtenerTecnicosConMasIncidentesResueltosporEspecialidad(@PathVariable Integer dias, @PathVariable Long idEspecialidad) {
+        return ResponseEntity.ok(tecnicoService.obtenerTecnicosConMasIncidentesResueltosporEspecialidad(dias, idEspecialidad));
+    }
+
+    @GetMapping("/menor-tiempo-resolucion")
+    public ResponseEntity<List<Object[]>> obtenerTecnicosConMenorTiempoResolucion() {
+        return ResponseEntity.ok(tecnicoService.obtenerTecnicosConMenorTiempoResolucion());
+    }
 }

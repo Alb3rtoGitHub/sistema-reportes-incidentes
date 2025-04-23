@@ -2,7 +2,7 @@ package com.example.sistemareportesincidentes.service.impl;
 
 import com.example.sistemareportesincidentes.dto.EspecialidadDTO;
 import com.example.sistemareportesincidentes.entity.Especialidad;
-import com.example.sistemareportesincidentes.exception.ResourceAlreadyExistsdException;
+import com.example.sistemareportesincidentes.exception.ResourceAlreadyExistsException;
 import com.example.sistemareportesincidentes.exception.ResourceNotFoundException;
 import com.example.sistemareportesincidentes.repository.EspecialidadRepository;
 import com.example.sistemareportesincidentes.service.EspecialidadService;
@@ -37,7 +37,7 @@ public class EspecialidadServiceImpl implements EspecialidadService {
     public EspecialidadDTO saveEspecialidad(EspecialidadDTO especialidadDTO) {
         // Verificar si ya existe una especialidad con el mismo nombre
         if (especialidadRepository.existsEspecialidadByNombre(especialidadDTO.getNombre())) {
-            throw new ResourceAlreadyExistsdException("Especialidad", "nombre", especialidadDTO.getNombre());
+            throw new ResourceAlreadyExistsException("Especialidad", "nombre", especialidadDTO.getNombre());
         }
 
         Especialidad especialidad = Especialidad.builder()
@@ -55,7 +55,7 @@ public class EspecialidadServiceImpl implements EspecialidadService {
 
         // Verificar si el nuevo nombre ya existe en otra especialidad
         if (!especialidad.getNombre().equals(especialidadDTO.getNombre()) && especialidadRepository.existsEspecialidadByNombre(especialidadDTO.getNombre())) {
-            throw new ResourceAlreadyExistsdException("Especialidad", "nombre", especialidadDTO.getNombre());
+            throw new ResourceAlreadyExistsException("Especialidad", "nombre", especialidadDTO.getNombre());
         }
 
         especialidad.setNombre(especialidadDTO.getNombre());

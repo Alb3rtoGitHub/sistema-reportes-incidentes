@@ -19,12 +19,12 @@ public interface TecnicoService {
     TecnicoResponseDTO asociarEspecialidades(Long idTecnico, List<Long> especialidadesIds);
 
     TecnicoResponseDTO desasociarEspecialidades(Long idTecnico, Long idEspecialidad);
-    // Continuar con los metodos faltantes...
+
     List<TecnicoResponseDTO> findTecnicosByEspecialidad(Long especialidadId);
 
-//    List<Object[]> obtenerTecnicosConMasIncidentesResueltos(int dias);
-//
-//    List<Object[]> obtenerTecnicosConMasIncidentesResueltosporEspecialidad(int dias, Long especialidadId);
-//
-//    List<Object[]> obtenerTecnicosConMenorTiempoResolucion();
+    List<Object[]> obtenerTecnicosConMasIncidentesResueltos(int dias);
+
+    List<Object[]> obtenerTecnicosConMasIncidentesResueltosporEspecialidad(int dias, Long especialidadId);
+
+    List<Object[]> obtenerTecnicosConMenorTiempoResolucion();
 }

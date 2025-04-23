@@ -2,7 +2,7 @@ package com.example.sistemareportesincidentes.service.impl;
 
 import com.example.sistemareportesincidentes.dto.ServicioDTO;
 import com.example.sistemareportesincidentes.entity.Servicio;
-import com.example.sistemareportesincidentes.exception.ResourceAlreadyExistsdException;
+import com.example.sistemareportesincidentes.exception.ResourceAlreadyExistsException;
 import com.example.sistemareportesincidentes.exception.ResourceNotFoundException;
 import com.example.sistemareportesincidentes.repository.ServicioRepository;
 import com.example.sistemareportesincidentes.service.ServicioService;
@@ -44,7 +44,7 @@ public class ServicioServiceImpl implements ServicioService {
     public ServicioDTO saveServicio(ServicioDTO servicioDTO) {
         // Verificar si ya existe un servicio con el mismo nombre
         if (servicioRepository.existsServicioByNombre(servicioDTO.getNombre())) {
-            throw new ResourceAlreadyExistsdException("Servicio", "nombre", servicioDTO.getNombre());
+            throw new ResourceAlreadyExistsException("Servicio", "nombre", servicioDTO.getNombre());
         }
 
         Servicio servicio = Servicio.builder()
@@ -62,7 +62,7 @@ public class ServicioServiceImpl implements ServicioService {
 
         // Verificar si el nuevo nombre ya existe en otro servicio
         if (!servicio.getNombre().equals(servicioDTO.getNombre()) && servicioRepository.existsServicioByNombre(servicioDTO.getNombre())) {
-            throw new ResourceAlreadyExistsdException("Servicio", "nombre", servicioDTO.getNombre());
+            throw new ResourceAlreadyExistsException("Servicio", "nombre", servicioDTO.getNombre());
         }
 
         servicio.setNombre(servicioDTO.getNombre());
