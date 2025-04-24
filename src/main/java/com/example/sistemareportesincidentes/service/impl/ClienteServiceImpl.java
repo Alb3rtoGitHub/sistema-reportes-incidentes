@@ -108,6 +108,7 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
+    @Transactional
     public ClienteResponseDTO asociarServicios(Long idCliente, List<Long> serviciosIds) {
         Cliente cliente = clienteRepository.findById(idCliente).orElseThrow(()-> new ResourceNotFoundException("Cliente", "id", idCliente));
 
@@ -121,6 +122,7 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
+    @Transactional
     public ClienteResponseDTO desasociarServicios(Long idCliente, Long idServicio) {
         Cliente cliente = clienteRepository.findById(idCliente).orElseThrow(()-> new ResourceNotFoundException("Cliente", "id", idCliente));
 

@@ -98,6 +98,7 @@ public class TecnicoServiceImpl implements TecnicoService {
     }
 
     @Override
+    @Transactional
     public void deleteTecnicoById(Long id) {
         if (!tecnicoRepository.existsById(id)) {
             throw new ResourceNotFoundException("Tecnico", "id", id);
@@ -114,6 +115,7 @@ public class TecnicoServiceImpl implements TecnicoService {
 
 
     @Override
+    @Transactional
     public TecnicoResponseDTO asociarEspecialidades(Long idTecnico, List<Long> especialidadesIds) {
         Tecnico tecnico = tecnicoRepository.findById(idTecnico).orElseThrow(() -> new ResourceNotFoundException("Tecnico", "id", idTecnico));
 
@@ -127,6 +129,7 @@ public class TecnicoServiceImpl implements TecnicoService {
     }
 
     @Override
+    @Transactional
     public TecnicoResponseDTO desasociarEspecialidades(Long idTecnico, Long idEspecialidad) {
         Tecnico tecnico = tecnicoRepository.findById(idTecnico).orElseThrow(() -> new ResourceNotFoundException("Tecnico", "id", idTecnico));
 
