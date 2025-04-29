@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,8 +46,7 @@ public class TipoProblemaServiceImpl implements TipoProblemaService {
     @Transactional
     public TipoProblemaResponseDTO saveTipoProblema(TipoProblemaDTO tipoProblemaDTO) {
         // Verificar si ya existe un tipo de problema con el mismo nombre
-        Optional<TipoProblema> tipoProblemaExistente = tipoProblemaRepository.findTipoProblemaByNombre(tipoProblemaDTO.getNombre());
-        if (tipoProblemaExistente.isPresent()) {
+        if (tipoProblemaRepository.existsTipoProblemaByNombre(tipoProblemaDTO.getNombre())) {
             throw new ResourceAlreadyExistsException("TipoProblema", "nombre", tipoProblemaDTO.getNombre());
         }
 
@@ -106,7 +104,7 @@ public class TipoProblemaServiceImpl implements TipoProblemaService {
 
     @Override
     @Transactional
-    public void deleteTipoProblema(Long id) {
+    public void deleteTipoProblemaById(Long id) {
         if (!tipoProblemaRepository.existsById(id)) {
             throw new ResourceNotFoundException("TipoProblema", "id", id);
         }
@@ -133,7 +131,7 @@ public class TipoProblemaServiceImpl implements TipoProblemaService {
 
     @Override
     @Transactional
-    public TipoProblemaResponseDTO desasociarEspecialidad(Long idTipoProblema, Long idEspecialidad) {
+    public TipoProblemaResponseDTO desasociarEspecialidades(Long idTipoProblema, Long idEspecialidad) {
         TipoProblema tipoProblema = tipoProblemaRepository.findById(idTipoProblema).orElseThrow(() -> new ResourceNotFoundException("TipoProblema", "id", idTipoProblema));
 
         // Verificar si la especialidad existe
@@ -151,13 +149,19 @@ public class TipoProblemaServiceImpl implements TipoProblemaService {
     }
 
     @Override
-    public List<TipoProblema> findTiposProblemaPorEspecialidad(Long idEspecialidad) {
+    public List<TipoProblemaResponseDTO> findTiposProblemaByEspecialidadId(Long idEspecialidad) {
         // Este metodo podría requerir una consulta personalizada en el repositorio
-        // Por ahora, podemos filtrar en memoria
-        return tipoProblemaRepository.findAll().stream()
-                .filter(tp -> tp.getEspecialidadesRequeridas().stream()
-                        .anyMatch(esp -> esp.getIdEspecialidad().equals(idEspecialidad)))
+
+        // Consulta personalizada en el repositorio
+        return tipoProblemaRepository.findTiposProblemaByEspecialidadId(idEspecialidad).stream()
+                .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
+
+        // Si no, por ahora, podemos filtrar en memoria
+//        return tipoProblemaRepository.findAll().stream()
+//                .filter(tp -> tp.getEspecialidadesRequeridas().stream()
+//                        .anyMatch(esp -> esp.getIdEspecialidad().equals(idEspecialidad)))
+//                .collect(Collectors.toList());
     }
 
     // Metodo privado auxiliar para convertir entidad a DTO de respuesta

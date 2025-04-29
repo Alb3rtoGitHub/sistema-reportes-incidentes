@@ -56,7 +56,7 @@ public class TecnicoController {
     }
 
     @DeleteMapping("/{idTecnico}/especialidades/{idEspecialidad}")
-    public ResponseEntity<TecnicoResponseDTO> desasociarServicios(@PathVariable Long idTecnico, @PathVariable Long idEspecialidad) {
+    public ResponseEntity<TecnicoResponseDTO> desasociarEspecialidades(@PathVariable Long idTecnico, @PathVariable Long idEspecialidad) {
         return ResponseEntity.ok(tecnicoService.desasociarEspecialidades(idTecnico, idEspecialidad));
     }
 

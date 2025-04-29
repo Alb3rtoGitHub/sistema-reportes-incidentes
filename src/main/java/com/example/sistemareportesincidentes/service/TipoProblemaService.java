@@ -2,7 +2,6 @@ package com.example.sistemareportesincidentes.service;
 
 import com.example.sistemareportesincidentes.dto.TipoProblemaDTO;
 import com.example.sistemareportesincidentes.dto.TipoProblemaResponseDTO;
-import com.example.sistemareportesincidentes.entity.TipoProblema;
 
 import java.util.List;
 
@@ -15,11 +14,11 @@ public interface TipoProblemaService {
 
     TipoProblemaResponseDTO updateTipoProblema(Long id, TipoProblemaDTO tipoProblemaDTO);
 
-    void deleteTipoProblema(Long id);
+    void deleteTipoProblemaById(Long id);
 
     TipoProblemaResponseDTO asociarEspecialidades(Long idTipoProblema, List<Long> especialidadesIds);
 
-    TipoProblemaResponseDTO desasociarEspecialidad(Long idTipoProblema, Long idEspecialidad);
+    TipoProblemaResponseDTO desasociarEspecialidades(Long idTipoProblema, Long idEspecialidad);
 
-    List<TipoProblema> findTiposProblemaPorEspecialidad(Long idEspecialidad);
+    List<TipoProblemaResponseDTO> findTiposProblemaByEspecialidadId(Long idEspecialidad);
 }

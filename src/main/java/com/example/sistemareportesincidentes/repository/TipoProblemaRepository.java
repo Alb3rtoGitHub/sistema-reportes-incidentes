@@ -12,5 +12,5 @@ public interface TipoProblemaRepository extends JpaRepository<TipoProblema, Long
     boolean existsTipoProblemaByNombre(String nombre);
 
     @Query("SELECT tp FROM TipoProblema tp JOIN tp.especialidadesRequeridas e WHERE e.idEspecialidad = :idEspecialidad")
-    List<TipoProblema> findByEspecialidad(Long idEspecialidad);
+    List<TipoProblema> findTiposProblemaByEspecialidadId(Long idEspecialidad);
 }

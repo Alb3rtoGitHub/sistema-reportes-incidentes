@@ -17,7 +17,7 @@ public interface TecnicoRepository extends JpaRepository<Tecnico, Long> {
     Optional<Tecnico> findByEmail(String email);
 
     @Query("SELECT t FROM Tecnico t JOIN t.especialidades e WHERE e.idEspecialidad = :idEspecialidad")
-    List<Tecnico> findTecnicosByEspecialidadId(Long especialidadId);
+    List<Tecnico> findTecnicosByEspecialidadId(Long idEspecialidad);
 
     @Query("SELECT i.tecnicoAsignado, COUNT(i) as incidentesResueltos FROM Incidente i WHERE i.estado = 'RESUELTO' AND i.fechaResolucion >= :fechaInicio GROUP BY i.tecnicoAsignado ORDER BY incidentesResueltos DESC")
     List<Object[]> findTecnicosConMasIncidentesResueltos(LocalDateTime fechaInicio);
