@@ -13,4 +13,7 @@ public interface TipoProblemaRepository extends JpaRepository<TipoProblema, Long
 
     @Query("SELECT tp FROM TipoProblema tp JOIN tp.especialidadesRequeridas e WHERE e.idEspecialidad = :idEspecialidad")
     List<TipoProblema> findTiposProblemaByEspecialidadId(Long idEspecialidad);
+
+    @Query("SELECT COUNT(id) > 0 FROM IncidenteDetalle id WHERE id.tipoProblema.idTipoProblema = :idTipoProblema")
+    boolean existsIncidenteDetalleByTipoProblemaId(Long idTipoProblema);
 }

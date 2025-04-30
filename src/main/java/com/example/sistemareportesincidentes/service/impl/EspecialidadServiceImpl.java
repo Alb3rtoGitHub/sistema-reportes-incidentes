@@ -2,6 +2,7 @@ package com.example.sistemareportesincidentes.service.impl;
 
 import com.example.sistemareportesincidentes.dto.EspecialidadDTO;
 import com.example.sistemareportesincidentes.entity.Especialidad;
+import com.example.sistemareportesincidentes.exception.BadRequestException;
 import com.example.sistemareportesincidentes.exception.ResourceAlreadyExistsException;
 import com.example.sistemareportesincidentes.exception.ResourceNotFoundException;
 import com.example.sistemareportesincidentes.repository.EspecialidadRepository;
@@ -71,8 +72,16 @@ public class EspecialidadServiceImpl implements EspecialidadService {
             throw new ResourceNotFoundException("Especialidad", "id", idEspecialidad);
         }
 
-        // Aquí podría ser necesario verificar si la especialidad está siendo utilizada
-        // por técnicos o tipos de problemas antes de eliminarla
+        // Verificar si la especialidad está siendo utilizada por técnicos
+        if (especialidadRepository.existsTecnicoByEspecialidadId(idEspecialidad)) {
+            throw new BadRequestException("No se puede eliminar la especialidad porque está asignada a uno o más técnicos");
+        }
+
+        // Verificar si la especialidad está siendo utilizada por tipos de problemas
+        if (especialidadRepository.existsTipoProblemaByEspecialidadId(idEspecialidad)) {
+            throw new BadRequestException("No se puede eliminar la especialidad porque está asociada a uno o más tipos de problemas");
+        }
+
         especialidadRepository.deleteById(idEspecialidad);
     }
 

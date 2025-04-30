@@ -109,9 +109,10 @@ public class TipoProblemaServiceImpl implements TipoProblemaService {
             throw new ResourceNotFoundException("TipoProblema", "id", id);
         }
 
-        // Aquí podría ser necesario verificar si el tipo de problema está siendo utilizado
-        // en incidentes antes de eliminarlo
-
+        // Verificar si el tipo de problema está siendo utilizado en incidentes
+        if (tipoProblemaRepository.existsIncidenteDetalleByTipoProblemaId(id)) {
+            throw new BadRequestException("No se puede eliminar el tipo de problema porque está siendo utilizado en uno o más incidentes");
+        }
         tipoProblemaRepository.deleteById(id);
     }
 
@@ -156,12 +157,6 @@ public class TipoProblemaServiceImpl implements TipoProblemaService {
         return tipoProblemaRepository.findTiposProblemaByEspecialidadId(idEspecialidad).stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
-
-        // Si no, por ahora, podemos filtrar en memoria
-//        return tipoProblemaRepository.findAll().stream()
-//                .filter(tp -> tp.getEspecialidadesRequeridas().stream()
-//                        .anyMatch(esp -> esp.getIdEspecialidad().equals(idEspecialidad)))
-//                .collect(Collectors.toList());
     }
 
     // Metodo privado auxiliar para convertir entidad a DTO de respuesta

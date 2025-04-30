@@ -17,7 +17,7 @@ public class TipoProblemaDTO {
     private String nombre;
 
     @NotNull(message = "El tiempo estimado de resolución es obligatorio")
-    @Min(value = 1, message = "El tiempo estimado debe ser mayor a 0")@NotNull(message = "El tiempo estimado de resolución es obligatorio")
+    @Min(value = 1, message = "El tiempo estimado debe ser mayor a 0")
     private Integer tiempoEstimadoResolucion;
 
     @NotNull(message = "El tiempo máximo de resolución es obligatorio")
