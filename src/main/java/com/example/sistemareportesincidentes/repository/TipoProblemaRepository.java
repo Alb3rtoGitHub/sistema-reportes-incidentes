@@ -16,4 +16,6 @@ public interface TipoProblemaRepository extends JpaRepository<TipoProblema, Long
 
     @Query("SELECT COUNT(id) > 0 FROM IncidenteDetalle id WHERE id.tipoProblema.idTipoProblema = :idTipoProblema")
     boolean existsIncidenteDetalleByTipoProblemaId(Long idTipoProblema);
+
+    TipoProblema findTipoProblemasByIdTipoProblema(Long idTipoProblema);
 }

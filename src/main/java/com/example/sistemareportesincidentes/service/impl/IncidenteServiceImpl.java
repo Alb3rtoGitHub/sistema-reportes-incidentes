@@ -1,0 +1,209 @@
+package com.example.sistemareportesincidentes.service.impl;
+
+import com.example.sistemareportesincidentes.dto.IncidenteDTO;
+import com.example.sistemareportesincidentes.dto.IncidenteDetalleDTO;
+import com.example.sistemareportesincidentes.dto.TecnicoDTO;
+import com.example.sistemareportesincidentes.entity.*;
+import com.example.sistemareportesincidentes.exception.BadRequestException;
+import com.example.sistemareportesincidentes.exception.ResourceNotFoundException;
+import com.example.sistemareportesincidentes.repository.*;
+import com.example.sistemareportesincidentes.service.EspecialidadService;
+import com.example.sistemareportesincidentes.service.IncidenteService;
+import com.example.sistemareportesincidentes.service.TecnicoService;
+import com.example.sistemareportesincidentes.service.TipoProblemaService;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class IncidenteServiceImpl implements IncidenteService {
+
+    @Autowired
+    private IncidenteRepository incidenteRepository;
+
+    @Autowired
+    private ClienteRepository clienteRepository;
+
+    @Autowired
+    private TecnicoRepository tecnicoRepository;
+
+    @Autowired
+    private ServicioRepository servicioRepository;
+
+    @Autowired
+    private TipoProblemaRepository tipoProblemaRepository;
+
+    @Autowired
+    private TecnicoService tecnicoService;
+
+    @Autowired
+    private EspecialidadService especialidadService;
+
+    @Override
+    @Transactional
+    public IncidenteDTO crearIncidente(IncidenteDTO incidenteDTO) {
+        // Validar Cliente
+        Cliente cliente = clienteRepository.findById(incidenteDTO.getIdCliente())
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente", "id", incidenteDTO.getIdCliente()));
+
+        // // Validar técnico si se proporciona
+        Tecnico tecnico = null;
+        if (incidenteDTO.getIdTecnico() != null) {
+            tecnico = tecnicoRepository.findById(incidenteDTO.getIdTecnico())
+                    .orElseThrow(() -> new ResourceNotFoundException("Tecnico", "id", incidenteDTO.getIdTecnico()));
+        }
+
+        // Validar incidenteDetalle
+        if (incidenteDTO.getIncidentesDetalles() == null || incidenteDTO.getIncidentesDetalles().isEmpty()) {
+            throw new BadRequestException("El incidente debe tener al menos un detalle");
+        }
+
+        // Crear Incidente
+        Incidente incidente = Incidente.builder()
+                .cliente(cliente)
+                .tecnicoAsignado(tecnico)
+                .fechaCreacion(LocalDateTime.now())
+                .estado(Incidente.Estado.ABIERTO)
+                .tiempoEstimadoResolucion(calcularTiempoEstimadoResolucion(incidenteDTO.getIncidentesDetalles()))
+                .incidentesDetalles(new ArrayList<>())
+                .build();
+
+        // Crear incidente detalles
+        for (IncidenteDetalleDTO detalleDTO : incidenteDTO.getIncidentesDetalles()) {
+            Servicio servicio = servicioRepository.findById(detalleDTO.getIdServicio())
+                    .orElseThrow(() -> new ResourceNotFoundException("Servicio", "id", detalleDTO.getIdServicio()));
+
+            TipoProblema tipoProblema = tipoProblemaRepository.findById(detalleDTO.getIdTipoProblema())
+                    .orElseThrow(() -> new ResourceNotFoundException("Tipo problema", "id", detalleDTO.getIdTipoProblema()));
+
+            // falta un atributo que lo tiene la version 15 del dev0
+
+            IncidenteDetalle incidenteDetalle = IncidenteDetalle.builder()
+                    .descripcion(detalleDTO.getDescripcion())
+                    .servicio(servicio)
+                    .tipoProblema(tipoProblema)
+                    .build();
+
+            incidente.addDetalle(incidenteDetalle); // uso el metodo declarado público en Incidente
+        }
+
+        Incidente incidenteGuardado = incidenteRepository.save(incidente);
+        return convertToDTO(incidenteGuardado);
+    }
+
+
+    @Override
+    @Transactional
+    public IncidenteDTO resolverIncidente(Long idIncidente) {
+        Incidente incidente = incidenteRepository.findById(idIncidente)
+                .orElseThrow(() -> new ResourceNotFoundException("Incidente", "id", idIncidente));
+
+        if (incidente.getEstado() == Incidente.Estado.RESUELTO) {
+            throw new BadRequestException("El incidente ya está resuelto");
+        }
+
+        incidente.setEstado(Incidente.Estado.RESUELTO);
+        incidente.setFechaResolucion(LocalDateTime.now());
+
+        Incidente incidenteResuelto = incidenteRepository.save(incidente);
+        return convertToDTO(incidenteResuelto);
+    }
+
+    @Override
+    public List<IncidenteDTO> obtenerIncidentesPorTecnicoYFecha(Long idTecnico, LocalDateTime fecha) {
+        // Validar Técnico
+        if (!tecnicoRepository.existsById(idTecnico)) {
+            throw new ResourceNotFoundException("Tecnico", "id", idTecnico);
+        }
+
+        return incidenteRepository.findIncidentesPorTecnicoYFecha(idTecnico, fecha).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TecnicoDTO> obtenerTecnicosDisponibles(Long idEspecialidad) {
+        List<Long> especialidadesIdsDeTecnicoResponseDTO = new ArrayList<>();
+        return tecnicoService.findTecnicosByEspecialidad(idEspecialidad).stream()
+                .map(tecnicoResponseDTO -> {
+                    TecnicoDTO tecnicoDTO = new TecnicoDTO();
+                    tecnicoDTO.setId(tecnicoResponseDTO.getId());
+                    tecnicoDTO.setNombre(tecnicoResponseDTO.getNombre());
+                    tecnicoDTO.setEmail(tecnicoResponseDTO.getEmail());
+                    tecnicoDTO.setWhatsapp(tecnicoResponseDTO.getWhatsapp());
+                    tecnicoDTO.setMedioPreferido(tecnicoResponseDTO.getMedioPreferido());
+
+
+                    tecnicoDTO.setEspecialidadesIds(tecnicoResponseDTO.getEspecialidades().stream()
+                            .map(especialidadDTO -> {
+                                especialidadesIdsDeTecnicoResponseDTO.add(especialidadDTO.getId());
+                            return;}));
+
+                    return tecnicoDTO;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<IncidenteDTO> obtenerIncidentesPorServicio(Long idServicio) {
+        return List.of();
+    }
+
+    @Override
+    public List<IncidenteDTO> obtenerIncidentesPorTipoProblema(Long idTipoProblema) {
+        return List.of();
+    }
+
+    // Metodo privado auxiliar para calcular tiempo estimado de resolución
+    private Integer calcularTiempoEstimadoResolucion(@Valid List<IncidenteDetalleDTO> incidentesDetallesDTO) {
+        int tiempoMaximo = 0;
+        for (IncidenteDetalleDTO iDetalleDTO : incidentesDetallesDTO) {
+            TipoProblema tipoProblema = tipoProblemaRepository.findById(iDetalleDTO.getIdTipoProblema())
+                    .orElseThrow(() -> new ResourceNotFoundException("Tipo problema", "id", iDetalleDTO.getIdTipoProblema()));
+
+            if (tipoProblema.getTiempoEstimadoResolucion() > tiempoMaximo) {
+                tiempoMaximo = tipoProblema.getTiempoEstimadoResolucion();
+            }
+        }
+
+        return tiempoMaximo;
+    }
+
+    // Metodo privado auxiliar para convertir entidad a DTO
+    private IncidenteDTO convertToDTO(Incidente incidente) {
+        IncidenteDTO incidenteDTO = new IncidenteDTO();
+        incidenteDTO.setId(incidente.getIdIncidente());
+        incidenteDTO.setIdCliente(incidente.getCliente().getIdCliente());
+
+        if (incidente.getTecnicoAsignado() != null) {
+            incidenteDTO.setIdTecnico(incidente.getTecnicoAsignado().getIdTecnico());
+        }
+
+        incidenteDTO.setFechaCreacion(incidente.getFechaCreacion());
+        incidenteDTO.setFechaResolucion(incidente.getFechaResolucion());
+        incidenteDTO.setTiempoEstimadoResolucion(incidente.getTiempoEstimadoResolucion());
+        incidenteDTO.setEstado(incidente.getEstado().name());
+
+        // Convertir IncidentesDetalles a DTOs
+        List<IncidenteDetalleDTO> incidentesDetalleDTO = incidente.getIncidentesDetalles().stream()
+                .map(incidenteDetalle -> {
+                    IncidenteDetalleDTO incDetalleDTO = new IncidenteDetalleDTO();
+                    incDetalleDTO.setId(incidenteDetalle.getIdIncidenteDetalle());
+                    incDetalleDTO.setDescripcion(incidenteDetalle.getDescripcion());
+                    incDetalleDTO.setIdServicio(incidenteDetalle.getServicio().getIdServicio());
+                    incDetalleDTO.setIdTipoProblema(incidenteDetalle.getTipoProblema().getIdTipoProblema());
+                    return incDetalleDTO;
+                })
+                .collect(Collectors.toList());
+
+        incidenteDTO.setIncidentesDetalles(incidentesDetalleDTO);
+        return incidenteDTO;
+    }
+}
