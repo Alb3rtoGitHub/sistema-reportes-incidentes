@@ -56,7 +56,7 @@ public class TipoProblemaController {
     }
 
     @GetMapping("/especialidad/{idEspecialidad}")
-    public ResponseEntity<List<TipoProblemaResponseDTO>> obtenerTiposProblemaPorEspecialidad(@PathVariable Long idEspecialidad) {
+    public ResponseEntity<List<TipoProblemaResponseDTO>> obtenerTiposProblemaPorEspecialidadId(@PathVariable Long idEspecialidad) {
         return ResponseEntity.ok(tipoProblemaService.findTiposProblemaByEspecialidadId(idEspecialidad));
     }
 

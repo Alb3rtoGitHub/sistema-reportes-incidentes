@@ -107,8 +107,8 @@ public class TecnicoServiceImpl implements TecnicoService {
     }
 
     @Override
-    public List<TecnicoResponseDTO> findTecnicosByEspecialidad(Long especialidadId) {
-        return tecnicoRepository.findTecnicosByEspecialidadId(especialidadId).stream()
+    public List<TecnicoResponseDTO> findTecnicosByEspecialidad(Long idEspecialidad) {
+        return tecnicoRepository.findTecnicosByEspecialidadId(idEspecialidad).stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }

@@ -1,5 +1,6 @@
 package com.example.sistemareportesincidentes.service.impl;
 
+import com.example.sistemareportesincidentes.dto.EspecialidadDTO;
 import com.example.sistemareportesincidentes.dto.IncidenteDTO;
 import com.example.sistemareportesincidentes.dto.IncidenteDetalleDTO;
 import com.example.sistemareportesincidentes.dto.TecnicoDTO;
@@ -10,7 +11,6 @@ import com.example.sistemareportesincidentes.repository.*;
 import com.example.sistemareportesincidentes.service.EspecialidadService;
 import com.example.sistemareportesincidentes.service.IncidenteService;
 import com.example.sistemareportesincidentes.service.TecnicoService;
-import com.example.sistemareportesincidentes.service.TipoProblemaService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -130,7 +129,6 @@ public class IncidenteServiceImpl implements IncidenteService {
 
     @Override
     public List<TecnicoDTO> obtenerTecnicosDisponibles(Long idEspecialidad) {
-        List<Long> especialidadesIdsDeTecnicoResponseDTO = new ArrayList<>();
         return tecnicoService.findTecnicosByEspecialidad(idEspecialidad).stream()
                 .map(tecnicoResponseDTO -> {
                     TecnicoDTO tecnicoDTO = new TecnicoDTO();
@@ -139,13 +137,11 @@ public class IncidenteServiceImpl implements IncidenteService {
                     tecnicoDTO.setEmail(tecnicoResponseDTO.getEmail());
                     tecnicoDTO.setWhatsapp(tecnicoResponseDTO.getWhatsapp());
                     tecnicoDTO.setMedioPreferido(tecnicoResponseDTO.getMedioPreferido());
-
-
-                    tecnicoDTO.setEspecialidadesIds(tecnicoResponseDTO.getEspecialidades().stream()
-                            .map(especialidadDTO -> {
-                                especialidadesIdsDeTecnicoResponseDTO.add(especialidadDTO.getId());
-                            return;}));
-
+                    tecnicoDTO.setEspecialidadesIds(
+                            tecnicoResponseDTO.getEspecialidades().stream()
+                                    .map(EspecialidadDTO::getId)
+                                    .collect(Collectors.toList())
+                    );
                     return tecnicoDTO;
                 })
                 .collect(Collectors.toList());
@@ -153,12 +149,25 @@ public class IncidenteServiceImpl implements IncidenteService {
 
     @Override
     public List<IncidenteDTO> obtenerIncidentesPorServicio(Long idServicio) {
-        return List.of();
+        // Validar Servicio
+        if (!servicioRepository.existsById(idServicio)) {
+            throw new ResourceNotFoundException("Servicio", "id", idServicio);
+        }
+
+        return incidenteRepository.findIncidentesPorServicioId(idServicio).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<IncidenteDTO> obtenerIncidentesPorTipoProblema(Long idTipoProblema) {
-        return List.of();
+        // Validar Tipo Problema
+        if (!tipoProblemaRepository.existsById(idTipoProblema)) {
+            throw new ResourceNotFoundException("Tipo problema", "id", idTipoProblema);
+        }
+        return incidenteRepository.findIncidentesPorTipoProblemaId(idTipoProblema).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     // Metodo privado auxiliar para calcular tiempo estimado de resolución
@@ -172,7 +181,6 @@ public class IncidenteServiceImpl implements IncidenteService {
                 tiempoMaximo = tipoProblema.getTiempoEstimadoResolucion();
             }
         }
-
         return tiempoMaximo;
     }
 

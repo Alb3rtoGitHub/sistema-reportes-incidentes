@@ -14,5 +14,6 @@ public class IncidenteDetalleDTO {
     @NotNull(message = "El tipo de problema es obligatorio")
     private Long idTipoProblema;
 
+    // Puede ser null cuando se crea como parte de un nuevo incidente
     private Long idIncidente;
 }
