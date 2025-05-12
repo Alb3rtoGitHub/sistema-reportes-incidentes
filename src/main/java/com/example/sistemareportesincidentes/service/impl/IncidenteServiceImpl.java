@@ -8,7 +8,7 @@ import com.example.sistemareportesincidentes.entity.*;
 import com.example.sistemareportesincidentes.exception.BadRequestException;
 import com.example.sistemareportesincidentes.exception.ResourceNotFoundException;
 import com.example.sistemareportesincidentes.repository.*;
-import com.example.sistemareportesincidentes.service.EspecialidadService;
+//import com.example.sistemareportesincidentes.service.EspecialidadService;
 import com.example.sistemareportesincidentes.service.IncidenteService;
 import com.example.sistemareportesincidentes.service.TecnicoService;
 import jakarta.transaction.Transactional;
@@ -42,8 +42,8 @@ public class IncidenteServiceImpl implements IncidenteService {
     @Autowired
     private TecnicoService tecnicoService;
 
-    @Autowired
-    private EspecialidadService especialidadService;
+//    @Autowired
+//    private EspecialidadService especialidadService;
 
     @Override
     @Transactional
@@ -74,6 +74,9 @@ public class IncidenteServiceImpl implements IncidenteService {
                 .incidentesDetalles(new ArrayList<>())
                 .build();
 
+        // Guardar el incidente para obtener su ID
+        Incidente incidenteGuardado = incidenteRepository.save(incidente);
+
         // Crear incidente detalles
         for (IncidenteDetalleDTO detalleDTO : incidenteDTO.getIncidentesDetalles()) {
             Servicio servicio = servicioRepository.findById(detalleDTO.getIdServicio())
@@ -82,21 +85,19 @@ public class IncidenteServiceImpl implements IncidenteService {
             TipoProblema tipoProblema = tipoProblemaRepository.findById(detalleDTO.getIdTipoProblema())
                     .orElseThrow(() -> new ResourceNotFoundException("Tipo problema", "id", detalleDTO.getIdTipoProblema()));
 
-            // falta un atributo que lo tiene la version 15 del dev0
-
             IncidenteDetalle incidenteDetalle = IncidenteDetalle.builder()
                     .descripcion(detalleDTO.getDescripcion())
                     .servicio(servicio)
                     .tipoProblema(tipoProblema)
                     .build();
 
-            incidente.addDetalle(incidenteDetalle); // uso el metodo declarado público en Incidente
+            incidenteGuardado.addDetalle(incidenteDetalle); // uso el metodo declarado público en Incidente
         }
 
-        Incidente incidenteGuardado = incidenteRepository.save(incidente);
+        // Guardar el incidente con sus detalles
+        incidenteGuardado = incidenteRepository.save(incidenteGuardado);
         return convertToDTO(incidenteGuardado);
     }
-
 
     @Override
     @Transactional

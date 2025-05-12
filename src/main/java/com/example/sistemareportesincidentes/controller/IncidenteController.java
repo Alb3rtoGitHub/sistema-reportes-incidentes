@@ -1,7 +1,10 @@
 package com.example.sistemareportesincidentes.controller;
 
 import com.example.sistemareportesincidentes.dto.IncidenteDTO;
+import com.example.sistemareportesincidentes.dto.IncidenteDetalleDTO;
 import com.example.sistemareportesincidentes.dto.TecnicoDTO;
+import com.example.sistemareportesincidentes.exception.BadRequestException;
+import com.example.sistemareportesincidentes.service.IncidenteDetalleService;
 import com.example.sistemareportesincidentes.service.IncidenteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +17,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1//mesa-de-ayuda/incidentes")
+@RequestMapping("/api/v1/mesa-de-ayuda/incidentes")
 public class IncidenteController {
 
     @Autowired
     private IncidenteService incidenteService;
+
+    @Autowired
+    private IncidenteDetalleService incidenteDetalleService;
 
     @PostMapping
     public ResponseEntity<IncidenteDTO> crearIncidente(@Valid @RequestBody IncidenteDTO incidenteDTO) {
@@ -49,5 +55,45 @@ public class IncidenteController {
     @GetMapping("/tipo-problema/{idTipoProblema}")
     public ResponseEntity<List<IncidenteDTO>> obtenerIncidentesPorTipoProblema(@PathVariable Long idTipoProblema) {
         return ResponseEntity.ok(incidenteService.obtenerIncidentesPorTipoProblema(idTipoProblema));
+    }
+
+    // Endpoints para gestionar detalles de incidentes
+    @GetMapping("/{idIncidentes}/incidentes-detalles")
+    public ResponseEntity<List<IncidenteDetalleDTO>> obtenerIncidentesDetallesPorIncidenteId(@PathVariable Long idIncidente) {
+        return ResponseEntity.ok(incidenteDetalleService.findIncidentesDetalleByIncidenteId(idIncidente));
+    }
+
+    @PostMapping("/{idIncidente}/incidentes-detalles")
+    public ResponseEntity<IncidenteDetalleDTO> agregarDetalleAIncidente(@PathVariable Long idIncidente, @Valid @RequestBody IncidenteDetalleDTO incidenteDetalleDTO) {
+        incidenteDetalleDTO.setIdIncidente(idIncidente);
+        IncidenteDetalleDTO nuevoIncidenteDetalle = incidenteDetalleService.saveIncidenteDetalle(incidenteDetalleDTO);
+        return new ResponseEntity<>(nuevoIncidenteDetalle, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{idIncidente}/incidentes-detalles/{idIncidenteDetalle}")
+    public ResponseEntity<IncidenteDetalleDTO> actualizarDetalleDeIncidente(
+            @PathVariable Long idIncidente,
+            @PathVariable Long idIncidenteDetalle,
+            @Valid @RequestBody IncidenteDetalleDTO incidenteDetalleDTO) {
+        // Verificar que el detalle pertenece al incidente
+        IncidenteDetalleDTO incidenteDetalleExistente = incidenteDetalleService.findIncidenteDetalleById(idIncidenteDetalle);
+        if (!incidenteDetalleExistente.getIdIncidente().equals(idIncidente)) {
+            throw new BadRequestException("El detalle no pertenece al incidente especificado");
+        }
+
+        return ResponseEntity.ok(incidenteDetalleService.updateIncidenteDetalle(idIncidenteDetalle, incidenteDetalleDTO));
+    }
+
+    @DeleteMapping("/{idIncidente}/incidentes-detalles/{idIncidenteDetalle}")
+    public ResponseEntity<Void> eliminarDetalleDeIncidente(
+            @PathVariable Long idIncidente,
+            @PathVariable Long idIncidenteDetalle) {
+        // Verificar que el detalle pertenece al incidente
+        IncidenteDetalleDTO incidenteDetalleExistente = incidenteDetalleService.findIncidenteDetalleById(idIncidenteDetalle);
+        if (!incidenteDetalleExistente.getIdIncidente().equals(idIncidente)) {
+            throw new BadRequestException("El detalle no pertenece al incidente especificado");
+        }
+        incidenteDetalleService.deleteIncidenteDetalle(idIncidenteDetalle);
+        return ResponseEntity.noContent().build();
     }
 }
