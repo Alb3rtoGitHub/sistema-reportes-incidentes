@@ -38,7 +38,9 @@ public class IncidenteController {
     }
 
     @GetMapping("/tecnico/{idTecnico}/fecha/{fecha}")
-    public ResponseEntity<List<IncidenteDTO>> obtenerIncidentesPorTecnicoyFecha(@PathVariable Long idTecnico, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fecha) {
+    public ResponseEntity<List<IncidenteDTO>> obtenerIncidentesPorTecnicoyFecha(
+            @PathVariable Long idTecnico,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fecha) {
         return ResponseEntity.ok(incidenteService.obtenerIncidentesPorTecnicoYFecha(idTecnico, fecha));
     }
 
@@ -64,7 +66,9 @@ public class IncidenteController {
     }
 
     @PostMapping("/{idIncidente}/incidentes-detalles")
-    public ResponseEntity<IncidenteDetalleDTO> agregarDetalleAIncidente(@PathVariable Long idIncidente, @Valid @RequestBody IncidenteDetalleDTO incidenteDetalleDTO) {
+    public ResponseEntity<IncidenteDetalleDTO> agregarDetalleAIncidente(
+            @PathVariable Long idIncidente,
+            @Valid @RequestBody IncidenteDetalleDTO incidenteDetalleDTO) {
         incidenteDetalleDTO.setIdIncidente(idIncidente);
         IncidenteDetalleDTO nuevoIncidenteDetalle = incidenteDetalleService.saveIncidenteDetalle(incidenteDetalleDTO);
         return new ResponseEntity<>(nuevoIncidenteDetalle, HttpStatus.CREATED);
