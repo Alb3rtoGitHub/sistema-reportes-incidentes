@@ -20,7 +20,7 @@ public interface TecnicoService {
 
     TecnicoResponseDTO desasociarEspecialidades(Long idTecnico, Long idEspecialidad);
 
-    List<TecnicoResponseDTO> findTecnicosByEspecialidad(Long especialidadId);
+    List<TecnicoResponseDTO> findTecnicosByEspecialidad(Long idEspecialidad);
 
     List<Object[]> obtenerTecnicosConMasIncidentesResueltos(int dias);
 

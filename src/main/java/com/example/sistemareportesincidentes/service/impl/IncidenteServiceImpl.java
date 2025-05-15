@@ -8,7 +8,6 @@ import com.example.sistemareportesincidentes.entity.*;
 import com.example.sistemareportesincidentes.exception.BadRequestException;
 import com.example.sistemareportesincidentes.exception.ResourceNotFoundException;
 import com.example.sistemareportesincidentes.repository.*;
-//import com.example.sistemareportesincidentes.service.EspecialidadService;
 import com.example.sistemareportesincidentes.service.IncidenteService;
 import com.example.sistemareportesincidentes.service.TecnicoService;
 import jakarta.transaction.Transactional;
@@ -41,9 +40,6 @@ public class IncidenteServiceImpl implements IncidenteService {
 
     @Autowired
     private TecnicoService tecnicoService;
-
-//    @Autowired
-//    private EspecialidadService especialidadService;
 
     @Override
     @Transactional
