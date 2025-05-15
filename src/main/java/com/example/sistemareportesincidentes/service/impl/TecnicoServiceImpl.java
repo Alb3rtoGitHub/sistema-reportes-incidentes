@@ -154,9 +154,9 @@ public class TecnicoServiceImpl implements TecnicoService {
     }
 
     @Override
-    public List<Object[]> obtenerTecnicosConMasIncidentesResueltosporEspecialidad(int dias, Long especialidadId) {
+    public List<Object[]> obtenerTecnicosConMasIncidentesResueltosporEspecialidad(int dias, Long idEspecialidad) {
         LocalDateTime fechaInicio = LocalDateTime.now().minusDays(dias);
-        return tecnicoRepository.findTecnicosConMasIncidentesResueltosporEspecialidad(fechaInicio, especialidadId);
+        return tecnicoRepository.findTecnicosConMasIncidentesResueltosporEspecialidad(fechaInicio, idEspecialidad);
     }
 
     @Override

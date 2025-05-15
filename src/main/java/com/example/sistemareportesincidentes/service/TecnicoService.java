@@ -24,7 +24,7 @@ public interface TecnicoService {
 
     List<Object[]> obtenerTecnicosConMasIncidentesResueltos(int dias);
 
-    List<Object[]> obtenerTecnicosConMasIncidentesResueltosporEspecialidad(int dias, Long especialidadId);
+    List<Object[]> obtenerTecnicosConMasIncidentesResueltosporEspecialidad(int dias, Long idEspecialidad);
 
     List<Object[]> obtenerTecnicosConMenorTiempoResolucion();
 }

@@ -65,7 +65,7 @@ public class TecnicoController {
         return ResponseEntity.ok(tecnicoService.obtenerTecnicosConMasIncidentesResueltos(dias));
     }
 
-    @GetMapping("/mas-incidentes/{dias}/especialidad/{especialidad}")
+    @GetMapping("/mas-incidentes/{dias}/especialidad/{idEspecialidad}")
     public ResponseEntity<List<Object[]>> obtenerTecnicosConMasIncidentesResueltosporEspecialidad(@PathVariable Integer dias, @PathVariable Long idEspecialidad) {
         return ResponseEntity.ok(tecnicoService.obtenerTecnicosConMasIncidentesResueltosporEspecialidad(dias, idEspecialidad));
     }
