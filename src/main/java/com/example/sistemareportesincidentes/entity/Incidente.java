@@ -40,7 +40,8 @@ public class Incidente {
     private Cliente cliente;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "idTecnico", nullable = false)
+//    @JoinColumn(name = "idTecnico", nullable = false)
+    @JoinColumn(name = "idTecnico")
     private Tecnico tecnicoAsignado;
 
     @OneToMany(mappedBy = "incidente", cascade = CascadeType.ALL, orphanRemoval = true)
