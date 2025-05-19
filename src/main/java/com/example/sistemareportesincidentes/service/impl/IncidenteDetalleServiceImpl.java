@@ -181,7 +181,7 @@ public class IncidenteDetalleServiceImpl implements IncidenteDetalleService {
     // Metodo privado para convertir entidad a DTO
     private IncidenteDetalleDTO convertToIncidenteDetalleDTO(IncidenteDetalle incidenteDetalle) {
         IncidenteDetalleDTO incidenteDetalleDTO = new IncidenteDetalleDTO();
-        incidenteDetalleDTO.setIdIncidente(incidenteDetalle.getIdIncidenteDetalle());
+        incidenteDetalleDTO.setId(incidenteDetalle.getIdIncidenteDetalle());
         incidenteDetalleDTO.setDescripcion(incidenteDetalle.getDescripcion());
         incidenteDetalleDTO.setIdServicio(incidenteDetalle.getServicio().getIdServicio());
         incidenteDetalleDTO.setIdTipoProblema(incidenteDetalle.getTipoProblema().getIdTipoProblema());

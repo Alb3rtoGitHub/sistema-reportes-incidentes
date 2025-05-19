@@ -60,7 +60,7 @@ public class IncidenteController {
     }
 
     // Endpoints para gestionar detalles de incidentes
-    @GetMapping("/{idIncidentes}/incidentes-detalles")
+    @GetMapping("/{idIncidente}/incidentes-detalles")
     public ResponseEntity<List<IncidenteDetalleDTO>> obtenerIncidentesDetallesPorIncidenteId(@PathVariable Long idIncidente) {
         return ResponseEntity.ok(incidenteDetalleService.findIncidentesDetalleByIncidenteId(idIncidente));
     }

@@ -204,6 +204,7 @@ public class IncidenteServiceImpl implements IncidenteService {
                     incDetalleDTO.setDescripcion(incidenteDetalle.getDescripcion());
                     incDetalleDTO.setIdServicio(incidenteDetalle.getServicio().getIdServicio());
                     incDetalleDTO.setIdTipoProblema(incidenteDetalle.getTipoProblema().getIdTipoProblema());
+                    incDetalleDTO.setIdIncidente(incidenteDetalle.getIncidente().getIdIncidente());
                     return incDetalleDTO;
                 })
                 .collect(Collectors.toList());
