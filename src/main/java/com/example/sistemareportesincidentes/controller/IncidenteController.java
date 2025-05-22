@@ -26,10 +26,27 @@ public class IncidenteController {
     @Autowired
     private IncidenteDetalleService incidenteDetalleService;
 
+    @GetMapping
+    public ResponseEntity<List<IncidenteDTO>> listarIncidentes() {
+        return ResponseEntity.ok(incidenteService.findAllIncidentes());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<IncidenteDTO> obtenerIncidentePorId(@PathVariable Long id) {
+        return ResponseEntity.ok(incidenteService.findIncidenteById(id));
+    }
+
     @PostMapping
     public ResponseEntity<IncidenteDTO> crearIncidente(@Valid @RequestBody IncidenteDTO incidenteDTO) {
         IncidenteDTO nuevoIncidenteDTO = incidenteService.crearIncidente(incidenteDTO);
         return new ResponseEntity<>(nuevoIncidenteDTO, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}/asignar-tecnico/{idTecnico}")
+    public ResponseEntity<IncidenteDTO> asignarTecnico(
+            @PathVariable Long id,
+            @PathVariable Long idTecnico) {
+        return ResponseEntity.ok(incidenteService.asignarTecnico(id, idTecnico));
     }
 
     @PutMapping("/{idIncidente}/resolver")

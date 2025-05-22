@@ -17,7 +17,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +42,19 @@ public class IncidenteServiceImpl implements IncidenteService {
 
     @Autowired
     private TecnicoService tecnicoService;
+
+    @Override
+    public List<IncidenteDTO> findAllIncidentes() {
+        return incidenteRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public IncidenteDTO findIncidenteById(Long id) {
+        Incidente incidente = incidenteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Incidente", "id", id));
+        return convertToDTO(incidente);
+    }
 
     @Override
     @Transactional
@@ -90,9 +105,81 @@ public class IncidenteServiceImpl implements IncidenteService {
             incidenteGuardado.addDetalle(incidenteDetalle); // uso el metodo declarado público en Incidente
         }
 
+        // Si hay técnico asignado, aplicar el "colchón" si es necesario
+        if (tecnico != null) {
+            // Verificar si el incidente es complejo
+            boolean esComplejo = incidenteDTO.getIncidentesDetalles().size() > 1;
+
+            if (esComplejo) {
+                // Añadir un 20% adicional como "colchón"
+                int tiempoBase = incidenteGuardado.getTiempoEstimadoResolucion(); // todO NOES GETTIEMPOBASE?????????????????????????
+                incidenteGuardado.setTiempoEstimadoResolucion((int) (tiempoBase * 1.2));
+            }
+        }
+
         // Guardar el incidente con sus detalles
         incidenteGuardado = incidenteRepository.save(incidenteGuardado);
         return convertToDTO(incidenteGuardado);
+    }
+
+    @Override
+    @Transactional
+    public IncidenteDTO asignarTecnico(Long idIncidente, Long idTecnico) {
+        // Buscar el incidente
+        Incidente incidente = incidenteRepository.findById(idIncidente)
+                .orElseThrow(() -> new ResourceNotFoundException("Incidente", "id", idIncidente));
+
+        // Verificar que el incidente no esté resuelto
+        if (incidente.getEstado() == Incidente.Estado.RESUELTO) {
+            throw new BadRequestException("No se puede asignar un técnico a un incidente resuelto");
+        }
+
+        // Buscar el técnico
+        Tecnico tecnico = tecnicoRepository.findById(idTecnico)
+                .orElseThrow(() -> new ResourceNotFoundException("Tecnico", "id", idTecnico));
+
+        // Verificar que el técnico tenga las especialidades requeridas
+        Set<Long> especialidadesRequeridasIds = new HashSet<>();
+        for (IncidenteDetalle incidenteDetalle : incidente.getIncidentesDetalles()) { // por cada elemento (incidenteDetalle) de la lista de IncidenteDetalles...
+            TipoProblema tipoProblema = incidenteDetalle.getTipoProblema();  // veo el tipo de problema...
+            tipoProblema.getEspecialidadesRequeridas().forEach(especialidadeRequerida -> // el tipo de problema tiene un set de Especialidad que son requeridas...por cada elemento de esa lista...
+                    especialidadesRequeridasIds.add(especialidadeRequerida.getIdEspecialidad())); // tomo el idEspecialidad y lo agrego la lista de especialidadesRequeridasIds...
+        }
+
+        Set<Long> especialidadesTecnico = tecnico.getEspecialidades().stream()
+                .map(Especialidad::getIdEspecialidad)
+                .collect(Collectors.toSet());
+
+        // Crear una copia para realizar la intersección de los dos Set y encontrar los que son comunes
+        Set<Long> especialidadesComunes = new HashSet<>(especialidadesTecnico);
+        // Realizar la intersección con las especialidades requeridas
+        especialidadesComunes.retainAll(especialidadesRequeridasIds); //retainAll destruye el listado original y arma uno nuevo con los elementos comunes de los dos listados
+
+        // Verificar si hay al menos una especialidad en común
+        if (especialidadesComunes.isEmpty()) {
+            throw new BadRequestException("El técnico no tiene ninguna de las especialidades requeridas para este incidente");
+        }
+
+        // Asignar el técnico al incidente
+        incidente.setTecnicoAsignado(tecnico);
+
+        // Recalcular el tiempo estimado de resolución considerando un "colchón" para problemas complejos
+        int tiempoBase = calcularTiempoBase(incidente.getIncidentesDetalles());
+
+        // Aplicar "colchón" si el problema es complejo (más de un detalle o tipos de problema complejos)
+        boolean esComplejo = incidente.getIncidentesDetalles().size() > 1 || incidente.getIncidentesDetalles().stream()
+                .anyMatch(d -> d.getTipoProblema().getTiempoMaximoResolucion() > 120);
+
+        if (esComplejo) {
+            // Añadir un 20% adicional como "colchón"
+            tiempoBase = (int) (tiempoBase * 1.2);
+        }
+
+        incidente.setTiempoEstimadoResolucion(tiempoBase);
+
+        // Guardar y devolver el incidente actualizado
+        Incidente incidenteActualizado = incidenteRepository.save(incidente);
+        return convertToDTO(incidenteActualizado);
     }
 
     @Override
@@ -174,6 +261,18 @@ public class IncidenteServiceImpl implements IncidenteService {
             TipoProblema tipoProblema = tipoProblemaRepository.findById(iDetalleDTO.getIdTipoProblema())
                     .orElseThrow(() -> new ResourceNotFoundException("Tipo problema", "id", iDetalleDTO.getIdTipoProblema()));
 
+            if (tipoProblema.getTiempoEstimadoResolucion() > tiempoMaximo) {
+                tiempoMaximo = tipoProblema.getTiempoEstimadoResolucion();
+            }
+        }
+        return tiempoMaximo;
+    }
+
+    // Metodo privado auxiliar para calcular tiempo base
+    private int calcularTiempoBase(@Valid List<IncidenteDetalle> incidentesDetalles) {
+        int tiempoMaximo = 0;
+        for (IncidenteDetalle iDetalle : incidentesDetalles) {
+            TipoProblema tipoProblema = iDetalle.getTipoProblema();
             if (tipoProblema.getTiempoEstimadoResolucion() > tiempoMaximo) {
                 tiempoMaximo = tipoProblema.getTiempoEstimadoResolucion();
             }
