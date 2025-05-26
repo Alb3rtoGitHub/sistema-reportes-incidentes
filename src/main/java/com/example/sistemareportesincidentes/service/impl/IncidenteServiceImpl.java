@@ -9,6 +9,7 @@ import com.example.sistemareportesincidentes.exception.BadRequestException;
 import com.example.sistemareportesincidentes.exception.ResourceNotFoundException;
 import com.example.sistemareportesincidentes.repository.*;
 import com.example.sistemareportesincidentes.service.IncidenteService;
+//import com.example.sistemareportesincidentes.service.NotificacionService;
 import com.example.sistemareportesincidentes.service.TecnicoService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -43,6 +44,9 @@ public class IncidenteServiceImpl implements IncidenteService {
     @Autowired
     private TecnicoService tecnicoService;
 
+//    @Autowired
+//    private NotificacionService notificacionService;
+
     @Override
     public List<IncidenteDTO> findAllIncidentes() {
         return incidenteRepository.findAll().stream()
@@ -52,7 +56,8 @@ public class IncidenteServiceImpl implements IncidenteService {
 
     @Override
     public IncidenteDTO findIncidenteById(Long id) {
-        Incidente incidente = incidenteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Incidente", "id", id));
+        Incidente incidente = incidenteRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Incidente", "id", id));
         return convertToDTO(incidente);
     }
 
@@ -179,6 +184,10 @@ public class IncidenteServiceImpl implements IncidenteService {
 
         // Guardar y devolver el incidente actualizado
         Incidente incidenteActualizado = incidenteRepository.save(incidente);
+
+        // Notificar al técnico sobre la asignación
+//        notificacionService.notificarTecnicoAsignacion(tecnico, incidenteActualizado);
+
         return convertToDTO(incidenteActualizado);
     }
 
@@ -196,6 +205,10 @@ public class IncidenteServiceImpl implements IncidenteService {
         incidente.setFechaResolucion(LocalDateTime.now());
 
         Incidente incidenteResuelto = incidenteRepository.save(incidente);
+
+        // Notificar al cliente sobre la resolución
+//        notificacionService.notificarClienteResolucion(incidenteResuelto.getCliente(), incidenteResuelto);
+
         return convertToDTO(incidenteResuelto);
     }
 
@@ -254,9 +267,10 @@ public class IncidenteServiceImpl implements IncidenteService {
                 .collect(Collectors.toList());
     }
 
-    // Metodo privado auxiliar para calcular tiempo estimado de resolución
+    // Metodo privado auxiliar para calcular tiempo estimado de resolución (DTO)
     private Integer calcularTiempoEstimadoResolucion(@Valid List<IncidenteDetalleDTO> incidentesDetallesDTO) {
         int tiempoMaximo = 0;
+
         for (IncidenteDetalleDTO iDetalleDTO : incidentesDetallesDTO) {
             TipoProblema tipoProblema = tipoProblemaRepository.findById(iDetalleDTO.getIdTipoProblema())
                     .orElseThrow(() -> new ResourceNotFoundException("Tipo problema", "id", iDetalleDTO.getIdTipoProblema()));
@@ -268,9 +282,10 @@ public class IncidenteServiceImpl implements IncidenteService {
         return tiempoMaximo;
     }
 
-    // Metodo privado auxiliar para calcular tiempo base
-    private int calcularTiempoBase(@Valid List<IncidenteDetalle> incidentesDetalles) {
+    // Metodo privado auxiliar para calcular tiempo base (Entidades)
+    private Integer calcularTiempoBase(@Valid List<IncidenteDetalle> incidentesDetalles) {
         int tiempoMaximo = 0;
+
         for (IncidenteDetalle iDetalle : incidentesDetalles) {
             TipoProblema tipoProblema = iDetalle.getTipoProblema();
             if (tipoProblema.getTiempoEstimadoResolucion() > tiempoMaximo) {
