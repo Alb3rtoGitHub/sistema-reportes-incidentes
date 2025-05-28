@@ -9,7 +9,7 @@ import com.example.sistemareportesincidentes.exception.BadRequestException;
 import com.example.sistemareportesincidentes.exception.ResourceNotFoundException;
 import com.example.sistemareportesincidentes.repository.*;
 import com.example.sistemareportesincidentes.service.IncidenteService;
-//import com.example.sistemareportesincidentes.service.NotificacionService;
+import com.example.sistemareportesincidentes.service.NotificacionService;
 import com.example.sistemareportesincidentes.service.TecnicoService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -44,8 +44,8 @@ public class IncidenteServiceImpl implements IncidenteService {
     @Autowired
     private TecnicoService tecnicoService;
 
-//    @Autowired
-//    private NotificacionService notificacionService;
+    @Autowired
+    private NotificacionService notificacionService;
 
     @Override
     public List<IncidenteDTO> findAllIncidentes() {
@@ -68,7 +68,7 @@ public class IncidenteServiceImpl implements IncidenteService {
         Cliente cliente = clienteRepository.findById(incidenteDTO.getIdCliente())
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente", "id", incidenteDTO.getIdCliente()));
 
-        // // Validar técnico si se proporciona
+        // Validar técnico si se proporciona
         Tecnico tecnico = null;
         if (incidenteDTO.getIdTecnico() != null) {
             tecnico = tecnicoRepository.findById(incidenteDTO.getIdTecnico())
@@ -117,7 +117,7 @@ public class IncidenteServiceImpl implements IncidenteService {
 
             if (esComplejo) {
                 // Añadir un 20% adicional como "colchón"
-                int tiempoBase = incidenteGuardado.getTiempoEstimadoResolucion(); // todO NOES GETTIEMPOBASE?????????????????????????
+                int tiempoBase = incidenteGuardado.getTiempoEstimadoResolucion();
                 incidenteGuardado.setTiempoEstimadoResolucion((int) (tiempoBase * 1.2));
             }
         }
@@ -186,7 +186,7 @@ public class IncidenteServiceImpl implements IncidenteService {
         Incidente incidenteActualizado = incidenteRepository.save(incidente);
 
         // Notificar al técnico sobre la asignación
-//        notificacionService.notificarTecnicoAsignacion(tecnico, incidenteActualizado);
+        notificacionService.notificarTecnicoAsignacion(tecnico, incidenteActualizado);
 
         return convertToDTO(incidenteActualizado);
     }
@@ -207,7 +207,7 @@ public class IncidenteServiceImpl implements IncidenteService {
         Incidente incidenteResuelto = incidenteRepository.save(incidente);
 
         // Notificar al cliente sobre la resolución
-//        notificacionService.notificarClienteResolucion(incidenteResuelto.getCliente(), incidenteResuelto);
+        notificacionService.notificarClienteResolucion(incidenteResuelto.getCliente(), incidenteResuelto);
 
         return convertToDTO(incidenteResuelto);
     }

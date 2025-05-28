@@ -1,0 +1,111 @@
+1. Configuración de Email (Gmail como ejemplo)
+#### Habilitar "Contraseñas de aplicación" en Gmail
+
+1. Ve a tu cuenta de Google: [https://myaccount.google.com/](https://myaccount.google.com/)
+2. Selecciona "Seguridad" en el menú lateral
+3. En "Iniciar sesión en Google", habilita la "Verificación en 2 pasos" (si no la tienes activada)
+4. Una vez habilitada la verificación en 2 pasos, busca "Contraseñas de aplicaciones"
+5. Genera una nueva contraseña de aplicación para "Correo"
+6. Guarda esta contraseña generada (será algo como: `abcd efgh ijkl mnop`)
+
+####  Actualizar application.properties con distintos correos
+# Configuración de Email con Gmail
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=tu-email@gmail.com
+spring.mail.password=abcd efgh ijkl mnop
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+
+# Outlook/Hotmail:
+spring.mail.host=smtp-mail.outlook.com
+spring.mail.port=587
+spring.mail.username=tu-email@outlook.com
+spring.mail.password=tu-contraseña
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+# Yahoo:
+spring.mail.host=smtp.mail.yahoo.com
+spring.mail.port=587
+spring.mail.username=tu-email@yahoo.com
+spring.mail.password=tu-contraseña-de-aplicacion
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+2. Configuración de Twilio para WhatsApp
+#### Paso 1: Crear cuenta en Twilio
+
+1. Ve a [https://www.twilio.com/](https://www.twilio.com/)
+2. Crea una cuenta gratuita
+3. Verifica tu número de teléfono
+4. Ve al Dashboard de Twilio
+
+#### Paso 2: Obtener credenciales
+
+En el Dashboard de Twilio encontrarás:
+
+- **Account SID**: Un identificador único de tu cuenta (ejemplo: `ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`)
+- **Auth Token**: Tu token de autenticación (ejemplo: `your_auth_token_here`)
+
+#### Paso 3: Configurar WhatsApp Sandbox (para desarrollo)
+
+1. En el Dashboard de Twilio, ve a "Messaging" > "Try it out" > "Send a WhatsApp message"
+2. Sigue las instrucciones para configurar el Sandbox
+3. Obtendrás un número de WhatsApp de Twilio (ejemplo: `+14155238886`)
+
+#### Paso 4: Actualizar application.properties
+# Configuración de Twilio
+twilio.account.sid=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+twilio.auth.token=your_auth_token_here
+twilio.whatsapp.number=+14155238886
+
+
+3. Configuración Completa de application.properties:
+# MySQL Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3307/incidentesdb
+spring.datasource.username=root
+spring.datasource.password=root
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# Hibernate Configuration
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+spring.jpa.show-sql=true
+
+# Server Configuration
+server.port=8080
+
+# Logging Configuration
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
+
+# Email Configuration (Gmail)
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=tu-email@gmail.com
+spring.mail.password=tu-contraseña-de-aplicacion
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+
+# Twilio Configuration
+twilio.account.sid=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+twilio.auth.token=your_auth_token_here
+twilio.whatsapp.number=+14155238886
+
+# JWT Configuration
+app.jwtSecret=miClaveSecretaParaGenerarTokensJWTDebeSerLargaYSegura123456789
+app.jwtExpirationMs=86400000
+
+# Inicialización de datos
+spring.jpa.defer-datasource-initialization=true
+spring.sql.init.mode=always
+
+4. Seguridad de las Credenciales
+# En application.properties
+spring.mail.username=${EMAIL_USERNAME}
+spring.mail.password=${EMAIL_PASSWORD}
+twilio.account.sid=${TWILIO_ACCOUNT_SID}
+twilio.auth.token=${TWILIO_AUTH_TOKEN}
