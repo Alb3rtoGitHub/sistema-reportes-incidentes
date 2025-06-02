@@ -5,22 +5,54 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiError> handleBadCredentialsException(
+            BadCredentialsException ex, HttpServletRequest request) {
+
+        ApiError apiError = new ApiError(
+                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "Credenciales inválidas");
+
+        apiError.setPath(request.getRequestURI());
+
+        return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiError> handleAuthenticationException(
+            AuthenticationException ex, HttpServletRequest request) {
+
+        ApiError apiError = new ApiError(
+                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "Error de autenticación");
+
+        apiError.setPath(request.getRequestURI());
+
+        return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
+    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleResourceNotFoundException(
@@ -84,11 +116,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 "Error de validación");
 
-        apiError.setPath(request.getContextPath());
+        // Obtener la URI correctamente de WebRequest
+        String path = "";
+        if (request instanceof ServletWebRequest) {
+            path = ((ServletWebRequest) request).getRequest().getRequestURI();
+        }
+
+        apiError.setPath(path);
         apiError.setErrors(errors);
 
-        return handleExceptionInternal(
-                ex, apiError, headers, HttpStatus.BAD_REQUEST, request);
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -115,6 +152,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleAllUncaughtException(
             Exception ex, HttpServletRequest request) {
+
+        if (ex instanceof AuthenticationException) {
+            throw (AuthenticationException) ex;
+        }
 
         ApiError apiError = new ApiError(
                 HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
