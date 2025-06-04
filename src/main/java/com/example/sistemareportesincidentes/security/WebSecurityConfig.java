@@ -64,16 +64,17 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Establecer el stateless
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/v1/auth/***").permitAll()
-                                .requestMatchers("/api/v1/rrhh/tecnicos/***").hasAnyRole("ADMIN", "RRHH")
-                                .requestMatchers("/api/v1/comercial/***").hasAnyRole("ADMIN", "COMERCIAL")
-                                .requestMatchers("/api/v1/mesa-de-ayuda/incidentes/***").hasAnyRole("ADMIN", "MESA_AYUDA")
+                        auth.requestMatchers("/api/v1/auth/**").permitAll()
+                                .requestMatchers("/api/v1/mesa-de-ayuda/**").hasAnyRole("ADMIN", "MESA_AYUDA")
+                                .requestMatchers("/api/v1/rrhh/**").hasAnyRole("ADMIN", "RRHH")
+                                .requestMatchers("/api/v1/comercial/**").hasAnyRole("ADMIN", "COMERCIAL")
                                 .anyRequest().authenticated()
                 );
 
         // AGREGAR proveedor de autenticación
         http.authenticationProvider(authenticationProvider());
-        // AGREGAR filtro JWT ANTES del filtro de autenticación po
+
+        // AGREGAR filtro JWT ANTES del filtro de autenticación
         http.addFilterBefore(authenticationJwtTokenFilter(),
                 UsernamePasswordAuthenticationFilter.class);
 

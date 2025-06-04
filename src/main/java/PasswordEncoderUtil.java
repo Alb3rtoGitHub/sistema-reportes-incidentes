@@ -1,5 +1,3 @@
-package com.example.sistemareportesincidentes;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class PasswordEncoderUtil {
