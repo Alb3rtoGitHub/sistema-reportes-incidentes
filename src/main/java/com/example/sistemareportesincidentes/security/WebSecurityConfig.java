@@ -65,6 +65,12 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Establecer el stateless
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/v1/auth/**").permitAll()
+                                // SWAGGER:
+                                .requestMatchers("/swagger-ui/**").permitAll()
+                                .requestMatchers("/swagger-ui.html").permitAll()
+                                .requestMatchers("/v3/api-docs/**").permitAll()
+                                .requestMatchers("/api-docs/**").permitAll()
+                                // END SWAGGER
                                 .requestMatchers("/api/v1/mesa-de-ayuda/**").hasAnyRole("ADMIN", "MESA_AYUDA")
                                 .requestMatchers("/api/v1/rrhh/**").hasAnyRole("ADMIN", "RRHH")
                                 .requestMatchers("/api/v1/comercial/**").hasAnyRole("ADMIN", "COMERCIAL")
